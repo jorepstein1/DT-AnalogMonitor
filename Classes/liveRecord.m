@@ -6,24 +6,26 @@ classdef liveRecord < handle
 		saverData  %dirPath,   filename,      notes
 		daqData    %srate,     chList,        gain
 		guiHandles %plots,     sampleCounter, acqTimer
-
+		
 		chCount %int number of active channels
 		srate
 		aiObj
 		
+		trial
+		
 		growingRawData
 		growingTimes
-		growth		
+		growth
 		
 		totalRawData
 		totalTimes
-
+		
 		axesHandles
 		sampleCounter
 		samplesObtained
 		movingData
 		
-
+		
 		axesData
 		
 		moveSwitch
@@ -31,21 +33,21 @@ classdef liveRecord < handle
 	
 	properties (Constant)
 		xMax = 10;
-		yMax = 5;
+		yMax = .005;
 	end
 	
 	
 	methods
 		function obj = liveRecord(saverData, daqData, guiHandles)
 			obj.saverData = saverData;
-			
+			obj.trial = 1;
 			obj.daqData = daqData;
 			obj.srate = daqData.srate;
-			obj.chCount = size(daqData.chList);
+			obj.chCount = size(daqData.chList,2);
 			
 			obj.guiHandles = guiHandles;
 			
-			obj.axesData = repmat([1 1 0],8,1) %matrix containing xScale, yScale, source for each axis	
+			obj.axesData = repmat([1 1 0],8,1) %matrix containing xScale, yScale, source for each axis
 		end
 		
 		function resetUI(obj)
@@ -55,7 +57,7 @@ classdef liveRecord < handle
 			ai.SamplesPerTrigger = inf;       %we will be continuously plotting data
 			ai.TimerPeriod = .1;              %frequency plot gets updated
 			ai.TimerFcn = {@obj.timerCbFunc}; %function that gets called when timer goes off
-			
+			obj.daqData.chList
 			addchannel(ai, obj.daqData.chList);           %collect data from this channel
 			%ai.Channel.GainPerChan = obj.daqData.gain;    %ranges of voltage will vary from -2.5-2.5, maximum resolution
 			
@@ -65,7 +67,7 @@ classdef liveRecord < handle
 			obj.totalRawData = [];
 			obj.growingRawData = [];
 			obj.growingTimes = [];
-			obj.growingMovingData = [];
+			obj.movingData = [];
 			obj.samplesObtained = 0;
 			obj.moveSwitch = 0;
 		end
@@ -78,9 +80,14 @@ classdef liveRecord < handle
 				[data, time] = getdata(ai, c);
 				
 				obj.samplesObtained = obj.samplesObtained + c;
-				obj.sampleCounter.String = sprintf('%d Samples',obj.samplesObtained);
+				handles.sampleCounter.String = sprintf('%d Samples',obj.samplesObtained);
 				
-				timerTime = time(end); %relative time of last sample in seconds
+				handles = obj.guiHandles;
+				handles.acqTimer = sprintf('%d Seconds since Start',time(end)); %relative time of last sample in seconds
+				rate = obj.srate;
+				
+				ad = obj.axesData;
+				yLim = obj.yMax;
 				
 				obj.growingRawData = [obj.growingRawData; data];
 				obj.totalRawData = [obj.totalRawData; data];
@@ -88,18 +95,20 @@ classdef liveRecord < handle
 					obj.movingData(:,a) = obj.growingRawData(:,a) - mean(obj.growingRawData(:,a));
 				end
 				obj.growingTimes = [obj.growingTimes; time];
+				lastTime = obj.growingTimes(end);
 				obj.growth = obj.growth + 1;
 				
 				
 				%PLOT DATA
 				for i = 1:8
-					ax = obj.axesHandles{i};
-					source = obj.axesDataSources{i};
-					xScale = obj.axesXScales{i};
-					xOffset = 10*xScale*obj.srate;
-					
-					
-					if ~isempty(source)
+					if ad(i,3) ~= 0
+						ax = handles.plots{i};
+						xScale = ad(i,1);
+						yrange = [-ad(i,2)*yLim ad(i,2)*yLim];
+						source = ad(i,3);
+						xOffset = 10*xScale*rate;
+	
+						
 						switch obj.moveSwitch
 							case 0
 								if obj.samplesObtained <= xOffset
@@ -107,21 +116,19 @@ classdef liveRecord < handle
 									yDat = obj.movingData(:,source);
 									plot(ax,xDat,yDat);
 									xlim(ax, [0 xScale*10])
-									ylim(ax, obj.axesYLims{i})
 								else
-									lastTime = obj.growingTimes(end);
 									xDat = obj.growingTimes(end-xOffset:end);
 									yDat = obj.movingData(end-xOffset:end,source);
 									plot(ax,xDat,yDat);
 									xlim(ax, [lastTime-xScale*8 lastTime+xScale*2])
 								end
 							case 1
-								lastTime = obj.growingTimes(end);
 								xDat = obj.growingTimes(end-.8*xOffset:end);
 								yDat = obj.movingData(end-.8*xOffset:end,source);
 								plot(ax,xDat,yDat);
 								xlim(ax, [lastTime-xScale*8 lastTime+xScale*2])
 						end
+						ylim(ax, yrange)
 					end
 				end
 				
@@ -132,33 +139,36 @@ classdef liveRecord < handle
 				end
 				if obj.growth == 110
 					obj.growth = 0;
-					obj.growingRawData = obj.rawData(end-10*obj.srate:end,:);
+					offset = 10*rate;
+					obj.growingRawData = obj.growingRawData(end-offset:end,:);
 					obj.totalTimes = [obj.totalTimes; obj.growingTimes];
-					obj.growingTimes = obj.growingTimes(end-10*obj.srate:end)
+					obj.growingTimes = obj.growingTimes(end-offset:end)
 				end
 			end
 			obj.movingData=[];
 		end
 		
 		function chAxes(obj, axID, colID, newVal)
-			obj.axesData(axID,colID) = newVal; % colID 1-> xScale 
-													 % 2-> yScale 
-													 % 3-> source's chList index
+			obj.axesData(axID,colID) = newVal; % colID 1-> xScale
+													% 2-> yScale
+											  	 % 3-> source's chList index
 		end
-
+		
 		function start(obj)
 			start(obj.aiObj); %trigger daq and begin timer
 		end
 		
 		function stop(obj)
 			stop(obj.aiObj)
-			dt = datetime('now','TimeZone','local','Format','HHmmss');
-			cd(obj.saveDir);
-			wha = obj.totalRawData;
-			fname = [obj.basename '.mat']
-			save(fname, 'wha')
+			sd = obj.saverData;
+			cd(sd.dirPath);
+			dat = {sd.notes obj.totalRawData};
+			fname = sd.filename;
+			fname = [sd.filename sprintf('%d',obj.trial) '.mat'];
+			save(fname, 'dat')
 			delete(obj.aiObj);
 			clear obj.aiObj;
+			obj.trial = obj.trial+1;
 		end
 		
 	end
