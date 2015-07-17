@@ -30,33 +30,14 @@ function plotGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 
 if ~isempty(varargin)
-	directory = varargin{1};
-	basename = varargin{2};
-	chList = varargin{3}; %given as array of numbers referring to 
-						  %active channels i.e. if channels 1, 3, and 5 
-						  %are active, chList=[1,3,5]
-						  
-	totalGain = varargin{4}; %scalar representing total gain through DAQ
-	
-	srate = varargin{5}; %sample rate given in hertz, should equal nyquist
-	
-	daqGain = varargin{6}; %value can be 1, 2, 4, or 8. The number is
-						   %used to set the analog input object's attribute
-						   %'gainperchan' which sets the range of possible
-						   %recorded values						
-else
-	directory = 'C:\';
-	chList = [1 2 4 8];
-	totalGain = 1000;
-	srate = 9001;
+	saverData = varargin{1};
+	daqData   = varargin{2};			
 end
-set(handles.pathDisplay, 'String', directory); %sets display for saving
-											   %directory
-setappdata(hObject,'gain',totalGain)
-setappdata(hObject,'srate',srate)
-									
-%%
-setappdata(hObject, 'chList', chList)
+
+set(handles.pathDisplay, 'String', saverData{1}); %sets display for saving
+											      %directory
+
+%%												  
 textChList=cell(length(chList)+1,1);
 for a=1:length(chList)+1
 	if a==1
@@ -65,19 +46,29 @@ for a=1:length(chList)+1
 	textChList{a} = sprintf('Channel %02d',chList(a-1)); 
 	end
 end
-for a=1:8
-	handles.(sprintf('dataPicker%d',a)).String = textChList;
-end
-handles.channelListBox.String = textChList;
+
+
+handles.dataPicker1.String = textChList;
+handles.dataPicker2.String = textChList;
+handles.dataPicker3.String = textChList;
+handles.dataPicker4.String = textChList;
+handles.dataPicker5.String = textChList;
+handles.dataPicker6.String = textChList;
+handles.dataPicker7.String = textChList;
+handles.dataPicker8.String = textChList;
+
+handles.channelListBox.String = textChList{2:end};
 %%
 
+%guiHandles is a struct containing references to GUI widgets
+guiHandles.plots = {handles.plot1 handles.plot2 handles.plot3 handles.plot4 ...
+		            handles.plot5 handles.plot6 handles.plot7 handles.plot8};
+guiHandles.sampleCounter = handles.samplesText;
+guiHandles.acqTimer = handles.timeText;
 
-recorder = liveRecord(directory, basename, chList, srate, daqGain);
-plots = {handles.plot1 handles.plot2 handles.plot3 handles.plot4 ...
-	handles.plot5 handles.plot6 handles.plot7 handles.plot8};
-recorder.setAxes(plots)
 
-recorder.setSampleCounter(handles.samplesText);
+recorder = liveRecord(saverData, daqData, guiHandles);
+
 setappdata(hObject,'recorder',recorder);
 guidata(hObject, handles);
 uiwait(handles.mainWindow)
@@ -426,42 +417,42 @@ function functionPicker8_Callback(hObject, eventdata, handles)
 function xMaxSlider1_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = round(hObject.Value,1);
-    rec.scaleLims('x',1,scale);
+    rec.scaleLims(1,1,scale);
 % --- Executes on slider movement.
 function xMaxSlider2_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = round(hObject.Value,1);
-    rec.scaleLims('x',2,scale);
+    rec.scaleLims(2,1,scale);
 % --- Executes on slider movement.
 function xMaxSlider3_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = round(hObject.Value,1);
-    rec.scaleLims('x',3,scale);
+    rec.scaleLims(3,1,scale);
 % --- Executes on slider movement.
 function xMaxSlider4_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = round(hObject.Value,1);
-    rec.scaleLims('x',4,scale);
+    rec.scaleLims(4,1,scale);
 % --- Executes on slider movement.
 function xMaxSlider5_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = round(hObject.Value,1);
-    rec.scaleLims('x',5,scale);
+    rec.scaleLims(5,1,scale);
 % --- Executes on slider movement.
 function xMaxSlider6_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = round(hObject.Value,1);
-    rec.scaleLims('x',6,scale);
+    rec.scaleLims(6,1,scale);
 % --- Executes on slider movement.
 function xMaxSlider7_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = round(hObject.Value,1);
-    rec.scaleLims('x',7,scale);
+    rec.scaleLims(7,1,scale);
 % --- Executes on slider movement.
 function xMaxSlider8_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = round(hObject.Value,1);
-    rec.scaleLims('x',8,scale);
+    rec.scaleLims(8,1,scale);
 
 
 
@@ -470,42 +461,42 @@ function xMaxSlider8_Callback(hObject, eventdata, handles)
 function yMaxSlider1_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = hObject.Value;
-    rec.scaleLims('y',1,scale);
+    rec.scaleLims(1,2,scale);
 % --- Executes on slider movement.
 function yMaxSlider2_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = hObject.Value;
-    rec.scaleLims('y',2,scale);
+    rec.scaleLims(2,2,scale);
 % --- Executes on slider movement.
 function yMaxSlider3_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = hObject.Value;
-    rec.scaleLims('y',3,scale);
+    rec.scaleLims(3,2,scale);
 % --- Executes on slider movement.
 function yMaxSlider4_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = hObject.Value;
-    rec.scaleLims('y',4,scale);
+    rec.scaleLims(4,2,scale);
 % --- Executes on slider movement.
 function yMaxSlider5_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = hObject.Value;
-    rec.scaleLims('y',5,scale);
+    rec.scaleLims(5,2,scale);
 % --- Executes on slider movement.
 function yMaxSlider6_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = hObject.Value;
-    rec.scaleLims('y',6,scale);
+    rec.scaleLims(6,2,scale);
 % --- Executes on slider movement.
 function yMaxSlider7_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = hObject.Value;
-    rec.scaleLims('y',7,scale);
+    rec.scaleLims(7,2,scale);
 % --- Executes on slider movement.
 function yMaxSlider8_Callback(hObject, eventdata, handles)
     rec = getappdata(handles.mainWindow,'recorder');
     scale = hObject.Value;
-    rec.scaleLims('y',8,scale);
+    rec.scaleLims(8,2,scale);
 
 
 function channelListBox_Callback(hObject, eventdata, handles)
