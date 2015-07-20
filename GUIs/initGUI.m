@@ -33,36 +33,36 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
-set(handles.dirShowText,'String','E:\recordings');
+set(handles.dirShowText,'String','E:\recordings\');
 uiwait(handles.initMainWindow);
 
-preAmpGain = str2double(handles.preAmpGainEdit.String);
-ampGain = str2double(handles.ampGainEdit.String);
-daqGainValue = handles.daqGainMenu.Value;
-switch daqGainValue
-	case 1
-		daqGain = 1;
-	case 2
-		daqGain = 2;
-	case 3
-		daqGain = 4;
-	case 4
-		daqGain = 8;
-end
-totalGain = preAmpGain * ampGain;
+%preAmpGain = str2double(handles.preAmpGainEdit.String);
+%ampGain = str2double(handles.ampGainEdit.String);
+%totalGain = preAmpGain * ampGain;
 
-directory = handles.dirShowText.String;
-basename = handles.basenameEdit.String;
-chList = handles.channelListBox.Value;
-srate = str2double(handles.sRateEdit.String);
-notes = handles.notesEdit.String;
+%saverData is struct containing info on saving
+saverData.dirPath = handles.dirShowText.String;   %directory path
+saverData.filename = handles.basenameEdit.String; %base File name
+saverData.notes = handles.notesEdit.String;       %notes
+
+%daqData is struct containing data for ai Input
+daqData.srate = str2double(handles.sRateEdit.String); %sample rate given in hertz, should equal nyquist
+daqData.chList = handles.channelListBox.Value;        %given as array of numbers referring to 
+										              %active channels i.e. if channels 1, 3, and 5 
+										              %are active, chList=[1,3,5]
+switch handles.daqGainMenu.Value %get dropdown box's index
+	case 1
+		daqData.gain = 1;        %values for ai.GainPerChan
+	case 2
+		daqData.gain = 2;
+	case 3
+		daqData.gain = 4;
+	case 4
+		daqData.gain = 8;
+end
+
 close all;
-plotGUI( directory, ...
-		 basename, ...
-	     chList, ...
-	     totalGain, ...
-	     srate, ...
-		 daqGain)
+plotGUI( saverData, daqData )
 
 
 

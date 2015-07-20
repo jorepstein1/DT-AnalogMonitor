@@ -37,7 +37,7 @@ if ~isempty(varargin)
 	daqData   = varargin{2};			
 end
 
-chList = daqData.chList;
+chList 
 set(handles.pathDisplay, 'String', saverData.dirPath); %sets display for saving
 											      %directory
 
@@ -61,7 +61,7 @@ handles.dataPicker6.String = textChList;
 handles.dataPicker7.String = textChList;
 handles.dataPicker8.String = textChList;
 
-handles.channelListBox.String = textChList;
+handles.channelListBox.String = textChList{2:end};
 %%
 
 %guiHandles is a struct containing references to GUI widgets
