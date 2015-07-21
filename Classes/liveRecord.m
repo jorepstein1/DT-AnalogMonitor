@@ -32,11 +32,11 @@ classdef liveRecord < handle
 		
 		moveSwitch
 		xMax = 10;
-		yMax = .005;
+		yMax = 5;
 	end
 	
 	methods
-		function obj = liveRecord(saverData, daqData, plots, hObject)
+		function obj = liveRecord(saverData, daqData, plots, handles)
 			obj.saverData = saverData;
 			obj.trial = 1;
 			obj.daqData = daqData;
@@ -44,9 +44,9 @@ classdef liveRecord < handle
 			obj.chCount = size(daqData.chList,2);
 			
 			obj.plotHandles = plots;
-			obj.guiHandles = guihandles(hObject)
+			obj.guiHandles = handles;
 			
-			obj.axesData = repmat([1 1 0],8,1) %matrix containing xScale, yScale, source for each axis
+			obj.axesData = repmat([1 1 0],8,1); %matrix containing xScale, yScale, source for each axis
 		end
 		
 		function resetUI(obj)
@@ -81,7 +81,7 @@ classdef liveRecord < handle
 				
 				obj.samplesObtained = obj.samplesObtained + c;
 				obj.guiHandles.samplesText.String = sprintf('%07d Samples',obj.samplesObtained);
-				obj.guiHandles.timeText.String = sprintf('%ds',time(end)); %relative time of last sample in seconds
+				obj.guiHandles.timeText.String = sprintf('%i s',time(end)); %relative time of last sample in seconds
 				rate = obj.srate;
 				
 				ad = obj.axesData;
@@ -140,7 +140,7 @@ classdef liveRecord < handle
 					offset = 10*rate;
 					obj.growingRawData = obj.growingRawData(end-offset:end,:);
 					obj.totalTimes = [obj.totalTimes; obj.growingTimes];
-					obj.growingTimes = obj.growingTimes(end-offset:end)
+					obj.growingTimes = obj.growingTimes(end-offset:end);
 				end
 			end
 			obj.movingData=[];
@@ -150,7 +150,11 @@ classdef liveRecord < handle
 			obj.axesData(axID,colID) = newVal; % colID 1-> xScale
 													% 2-> yScale
 											  	 % 3-> source's chList index
-		end
+        end
+        
+        function chGlobY(obj, newVal)
+            obj.yMax = newVal;
+        end
 		
 		function start(obj)
 			start(obj.aiObj); %trigger daq and begin timer
@@ -161,7 +165,6 @@ classdef liveRecord < handle
 			sd = obj.saverData;
 			cd(sd.dirPath);
 			dat = {sd.notes obj.totalRawData};
-			fname = sd.filename;
 			fname = [sd.filename sprintf('%d',obj.trial) '.mat'];
 			save(fname, 'dat')
 			delete(obj.aiObj);

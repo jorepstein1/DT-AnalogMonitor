@@ -3,13 +3,13 @@ function varargout = plotGUI(varargin)
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @plotGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @plotGUI_OutputFcn, ...
-                   'gui_LayoutFcn',  [], ...
-                   'gui_Callback',   []);
+    'gui_Singleton',  gui_Singleton, ...
+    'gui_OpeningFcn', @plotGUI_OpeningFcn, ...
+    'gui_OutputFcn',  @plotGUI_OutputFcn, ...
+    'gui_LayoutFcn',  [], ...
+    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
-   gui_State.gui_Callback = str2func(varargin{1});
+    gui_State.gui_Callback = str2func(varargin{1});
 end
 
 if nargout
@@ -24,7 +24,7 @@ end
 function plotGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % hObject    handle to figure
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   consists of 4 values given by initGUI: {directory, basename, 
+% varargin   consists of 4 values given by initGUI: {directory, basename,
 %										   	chList, totalGain, srate, ai}
 
 handles.output = hObject;
@@ -33,22 +33,22 @@ handles.startButton.Enable = 'off';
 handles.stopButton.Enable = 'off';
 
 if ~isempty(varargin)
-	saverData = varargin{1};
-	daqData   = varargin{2};			
+    saverData = varargin{1};
+    daqData   = varargin{2};
 end
 
 chList = daqData.chList;
 set(handles.pathDisplay, 'String', saverData.dirPath); %sets display for saving
-											      %directory
+%directory
 
-%%												  
+%%
 textChList=cell(length(chList)+1,1);
 for a=1:length(chList)+1
-	if a==1
-		textChList{a} = 'No Source';
-	else
-	textChList{a} = sprintf('Channel %02d',chList(a-1)); 
-	end
+    if a==1
+        textChList{a} = 'No Source';
+    else
+        textChList{a} = sprintf('Channel %02d',chList(a-1));
+    end
 end
 
 
@@ -65,10 +65,10 @@ handles.channelListBox.String = textChList;
 %%
 
 plots = {handles.plot1 handles.plot2 handles.plot3 handles.plot4 ...
-		            handles.plot5 handles.plot6 handles.plot7 handles.plot8};
+    handles.plot5 handles.plot6 handles.plot7 handles.plot8};
 
 
-recorder = liveRecord(saverData, daqData, plots, hObject);
+recorder = liveRecord(saverData, daqData, plots, handles);
 
 setappdata(hObject,'recorder',recorder);
 guidata(hObject, handles);
@@ -402,91 +402,91 @@ function functionPicker8_Callback(hObject, eventdata, handles)
 
 % --- Executes on slider movement.
 function xMaxSlider1_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = round(hObject.Value,1);
-    rec.chAxes(1,1,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = round(hObject.Value,1);
+rec.chAxes(1,1,scale);
 % --- Executes on slider movement.
 function xMaxSlider2_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = round(hObject.Value,1);
-    rec.chAxes(2,1,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = round(hObject.Value,1);
+rec.chAxes(2,1,scale);
 % --- Executes on slider movement.
 function xMaxSlider3_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = round(hObject.Value,1);
-    rec.chAxes(3,1,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = round(hObject.Value,1);
+rec.chAxes(3,1,scale);
 % --- Executes on slider movement.
 function xMaxSlider4_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = round(hObject.Value,1);
-    rec.chAxes(4,1,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = round(hObject.Value,1);
+rec.chAxes(4,1,scale);
 % --- Executes on slider movement.
 function xMaxSlider5_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = round(hObject.Value,1);
-    rec.chAxes(5,1,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = round(hObject.Value,1);
+rec.chAxes(5,1,scale);
 % --- Executes on slider movement.
 function xMaxSlider6_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = round(hObject.Value,1);
-    rec.chAxes(6,1,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = round(hObject.Value,1);
+rec.chAxes(6,1,scale);
 % --- Executes on slider movement.
 function xMaxSlider7_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = round(hObject.Value,1);
-    rec.chAxes(7,1,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = round(hObject.Value,1);
+rec.chAxes(7,1,scale);
 % --- Executes on slider movement.
 function xMaxSlider8_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = round(hObject.Value,1);
-    rec.chAxes(8,1,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = round(hObject.Value,1);
+rec.chAxes(8,1,scale);
 
 
 
 
 % --- Executes on slider movement.
 function yMaxSlider1_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = hObject.Value;
-    rec.chAxes(1,2,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = hObject.Value;
+rec.chAxes(1,2,scale);
 % --- Executes on slider movement.
 function yMaxSlider2_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = hObject.Value;
-    rec.chAxes(2,2,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = hObject.Value;
+rec.chAxes(2,2,scale);
 % --- Executes on slider movement.
 function yMaxSlider3_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = hObject.Value;
-    rec.chAxes(3,2,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = hObject.Value;
+rec.chAxes(3,2,scale);
 % --- Executes on slider movement.
 function yMaxSlider4_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = hObject.Value;
-    rec.chAxes(4,2,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = hObject.Value;
+rec.chAxes(4,2,scale);
 % --- Executes on slider movement.
 function yMaxSlider5_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = hObject.Value;
-    rec.chAxes(5,2,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = hObject.Value;
+rec.chAxes(5,2,scale);
 % --- Executes on slider movement.
 function yMaxSlider6_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = hObject.Value;
-    rec.chAxes(6,2,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = hObject.Value;
+rec.chAxes(6,2,scale);
 % --- Executes on slider movement.
 function yMaxSlider7_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = hObject.Value;
-    rec.chAxes(7,2,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = hObject.Value;
+rec.chAxes(7,2,scale);
 % --- Executes on slider movement.
 function yMaxSlider8_Callback(hObject, eventdata, handles)
-    rec = getappdata(handles.mainWindow,'recorder');
-    scale = hObject.Value;
-    rec.chAxes(8,2,scale);
+rec = getappdata(handles.mainWindow,'recorder');
+scale = hObject.Value;
+rec.chAxes(8,2,scale);
 
 
-	% --- Executes on button press in initButton.
+% --- Executes on button press in initButton.
 function initButton_Callback(hObject, eventdata, handles)
 rec = getappdata(handles.mainWindow, 'recorder');
 rec.resetUI()
@@ -523,35 +523,10 @@ rec.axesData(:,1) = newScales;
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
 
 function globalYedit_Callback(hObject, eventdata, handles)
-
-
-% --- Executes on button press in autoYcheck.
-function autoYcheck_Callback(hObject, eventdata, handles)
-% hObject    handle to autoYcheck (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of autoYcheck
-
-% --- Executes during object creation, after setting all properties.
-
-
-% --- Executes on key press with focus on globalYedit and none of its controls.
-function globalYedit_KeyPressFcn(hObject, eventdata, handles)
-% hObject    handle to globalYedit (see GCBO)
-% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
-%	Key: name of the key that was pressed, in lower case
-%	Character: character interpretation of the key(s) that was pressed
-%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
-% handles    structure with handles and user data (see GUIDATA)
-if strcmp(eventdata.key,'enter')
-	newVal = str2double(get(hObject,'String'));
-	if ~isnan(newVal)		
-	rec = getappdata(handles.mainWindow, 'recorder');
-	set(rec,'yMax',newVal);
-	guidata(hObject, newVal);
-	else
-		oldVal = guidata(hObject)
-		set(hObject, 'String', oldVal)
-	end
+newVal = str2double(get(hObject,'String'));
+rec = getappdata(handles.mainWindow, 'recorder');
+if ~isnan(newVal)
+    rec.chGlobY(newVal)
+else
+    set(hObject, 'String', rec.yMax)
 end
