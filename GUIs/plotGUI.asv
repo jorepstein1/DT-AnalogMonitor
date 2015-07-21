@@ -64,11 +64,14 @@ handles.dataPicker8.String = textChList;
 handles.channelListBox.String = textChList;
 %%
 
-plots = {handles.plot1 handles.plot2 handles.plot3 handles.plot4 ...
+%guiHandles is a struct containing references to GUI widgets
+guiHandles.plots = {handles.plot1 handles.plot2 handles.plot3 handles.plot4 ...
 		            handles.plot5 handles.plot6 handles.plot7 handles.plot8};
+guiHandles.sampleCounter = handles.samplesText;
+guiHandles.acqTimer = handles.timeText;
 
 
-recorder = liveRecord(saverData, daqData, plots, hObject);
+recorder = liveRecord(saverData, daqData, guiHandles);
 
 setappdata(hObject,'recorder',recorder);
 guidata(hObject, handles);
@@ -516,8 +519,7 @@ function globalXscaleSlider_Callback(hObject, eventdata, handles)
 newScale = round(get(hObject,'Value'),1);
 newScales = repmat(newScale,8,1);
 rec = getappdata(handles.mainWindow, 'recorder');
-rec.axesData(:,1) = newScales;
-
+rec.axesData(,
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider

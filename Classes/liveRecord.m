@@ -5,7 +5,9 @@ classdef liveRecord < handle
 		
 		saverData  %dirPath,   filename,      notes
 		daqData    %srate,     chList,        gain
-		guiHandles %plots,     sampleCounter, acqTimer
+		
+		plotHandles
+		guiHandles
 		
 		chCount %int number of active channels
 		srate
@@ -29,23 +31,20 @@ classdef liveRecord < handle
 		axesData
 		
 		moveSwitch
-	end
-	
-	properties (Constant)
 		xMax = 10;
 		yMax = .005;
 	end
 	
-	
 	methods
-		function obj = liveRecord(saverData, daqData, guiHandles)
+		function obj = liveRecord(saverData, daqData, plots, hObject)
 			obj.saverData = saverData;
 			obj.trial = 1;
 			obj.daqData = daqData;
 			obj.srate = daqData.srate;
 			obj.chCount = size(daqData.chList,2);
 			
-			obj.guiHandles = guiHandles;
+			obj.plotHandles = plots;
+			obj.guiHandles = guihandles(hObject)
 			
 			obj.axesData = repmat([1 1 0],8,1) %matrix containing xScale, yScale, source for each axis
 		end
@@ -77,13 +76,12 @@ classdef liveRecord < handle
 			
 			%COLLECT DATA
 			if c~=0
+				plots = obj.plotHandles;
 				[data, time] = getdata(ai, c);
 				
 				obj.samplesObtained = obj.samplesObtained + c;
-				handles.sampleCounter.String = sprintf('%d Samples',obj.samplesObtained);
-				
-				handles = obj.guiHandles;
-				handles.acqTimer = sprintf('%d Seconds since Start',time(end)); %relative time of last sample in seconds
+				obj.guiHandles.samplesText.String = sprintf('%07d Samples',obj.samplesObtained);
+				obj.guiHandles.timeText.String = sprintf('%ds',time(end)); %relative time of last sample in seconds
 				rate = obj.srate;
 				
 				ad = obj.axesData;
@@ -102,7 +100,7 @@ classdef liveRecord < handle
 				%PLOT DATA
 				for i = 1:8
 					if ad(i,3) ~= 0
-						ax = handles.plots{i};
+						ax = plots{i};
 						xScale = ad(i,1);
 						yrange = [-ad(i,2)*yLim ad(i,2)*yLim];
 						source = ad(i,3);

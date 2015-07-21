@@ -5,11 +5,15 @@ classdef liveRecord < handle
 		
 		saverData  %dirPath,   filename,      notes
 		daqData    %srate,     chList,        gain
-		guiHandles %plots,     sampleCounter, acqTimer
+		
+		plotHandles
+		guiHandles
 		
 		chCount %int number of active channels
 		srate
 		aiObj
+		
+		trial
 		
 		growingRawData
 		growingTimes
@@ -27,23 +31,20 @@ classdef liveRecord < handle
 		axesData
 		
 		moveSwitch
-	end
-	
-	properties (Constant)
 		xMax = 10;
-		yMax = 5;
+		yMax = .005;
 	end
-	
 	
 	methods
-		function obj = liveRecord(saverData, daqData, guiHandles)
+		function obj = liveRecord(saverData, daqData, plots, hObject)
 			obj.saverData = saverData;
-			
+			obj.trial = 1;
 			obj.daqData = daqData;
 			obj.srate = daqData.srate;
-			obj.chCount = size(daqData.chList);
+			obj.chCount = size(daqData.chList,2);
 			
-			obj.guiHandles = guiHandles;
+			obj.plotHandles = plots;
+			obj.guiHandles = guihandles(hObject)
 			
 			obj.axesData = repmat([1 1 0],8,1) %matrix containing xScale, yScale, source for each axis
 		end
@@ -55,7 +56,7 @@ classdef liveRecord < handle
 			ai.SamplesPerTrigger = inf;       %we will be continuously plotting data
 			ai.TimerPeriod = .1;              %frequency plot gets updated
 			ai.TimerFcn = {@obj.timerCbFunc}; %function that gets called when timer goes off
-			
+			obj.daqData.chList
 			addchannel(ai, obj.daqData.chList);           %collect data from this channel
 			%ai.Channel.GainPerChan = obj.daqData.gain;    %ranges of voltage will vary from -2.5-2.5, maximum resolution
 			
@@ -78,10 +79,10 @@ classdef liveRecord < handle
 				[data, time] = getdata(ai, c);
 				
 				obj.samplesObtained = obj.samplesObtained + c;
-				obj.sampleCounter.String = sprintf('%d Samples',obj.samplesObtained);
+				obj.guiHandles.samplesText.String = sprintf('%d Samples',obj.samplesObtained);
 				
-				handles = obj.guiHandles;
-				handles.acqTimer = sprintf('%d Seconds since Start',time(end)); %relative time of last sample in seconds
+				plots = obj.plotHandles;
+				obj.guiHandles.timeText.String = sprintf('%d Seconds',time(end)); %relative time of last sample in seconds
 				rate = obj.srate;
 				
 				ad = obj.axesData;
@@ -100,9 +101,9 @@ classdef liveRecord < handle
 				%PLOT DATA
 				for i = 1:8
 					if ad(i,3) ~= 0
-						ax = handles.plots{i};
+						ax = plots{i};
 						xScale = ad(i,1);
-						yrange = [-ad(i,2)*yLim ad(i,2)*yLim]
+						yrange = [-ad(i,2)*yLim ad(i,2)*yLim];
 						source = ad(i,3);
 						xOffset = 10*xScale*rate;
 	
@@ -126,7 +127,7 @@ classdef liveRecord < handle
 								plot(ax,xDat,yDat);
 								xlim(ax, [lastTime-xScale*8 lastTime+xScale*2])
 						end
-						ylim(ax, yRange)
+						ylim(ax, yrange)
 					end
 				end
 				
@@ -138,9 +139,9 @@ classdef liveRecord < handle
 				if obj.growth == 110
 					obj.growth = 0;
 					offset = 10*rate;
-					obj.growingRawData = obj.rawData(end-10*obj.srate:end,:);
+					obj.growingRawData = obj.growingRawData(end-offset:end,:);
 					obj.totalTimes = [obj.totalTimes; obj.growingTimes];
-					obj.growingTimes = obj.growingTimes(end-10*obj.srate:end)
+					obj.growingTimes = obj.growingTimes(end-offset:end)
 				end
 			end
 			obj.movingData=[];
@@ -148,8 +149,8 @@ classdef liveRecord < handle
 		
 		function chAxes(obj, axID, colID, newVal)
 			obj.axesData(axID,colID) = newVal; % colID 1-> xScale
-			% 2-> yScale
-			% 3-> source's chList index
+													% 2-> yScale
+											  	 % 3-> source's chList index
 		end
 		
 		function start(obj)
@@ -158,13 +159,15 @@ classdef liveRecord < handle
 		
 		function stop(obj)
 			stop(obj.aiObj)
-			dt = datetime('now','TimeZone','local','Format','HHmmss');
-			cd(obj.saveDir);
-			wha = obj.totalRawData;
-			fname = [obj.basename '.mat']
-			save(fname, 'wha')
+			sd = obj.saverData;
+			cd(sd.dirPath);
+			dat = {sd.notes obj.totalRawData};
+			fname = sd.filename;
+			fname = [sd.filename sprintf('%d',obj.trial) '.mat'];
+			save(fname, 'dat')
 			delete(obj.aiObj);
 			clear obj.aiObj;
+			obj.trial = obj.trial+1;
 		end
 		
 	end
