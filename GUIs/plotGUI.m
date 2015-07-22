@@ -64,11 +64,7 @@ handles.dataPicker8.String = textChList;
 handles.channelListBox.String = textChList;
 %%
 
-plots = {handles.plot1 handles.plot2 handles.plot3 handles.plot4 ...
-    handles.plot5 handles.plot6 handles.plot7 handles.plot8};
-
-
-recorder = liveRecord(saverData, daqData, plots, handles);
+recorder = liveRecord(saverData, daqData, handles);
 
 setappdata(hObject,'recorder',recorder);
 guidata(hObject, handles);
